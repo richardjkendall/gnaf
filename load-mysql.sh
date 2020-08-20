@@ -11,7 +11,7 @@
 
 MYSQL_HOST="127.0.0.1"
 MYSQL_USER="rjk"
-MYSQL_PASS=""
+MYSQL_PASS="test123"
 MYSQL_DB="gnaf"
 
 AUT=$1
@@ -61,5 +61,5 @@ fi
 
 echo ""
 echo "*** creating the PK indexes ***"
-mysql --host=$MYSQL_HOST --user=$MYSQL_USER --password=$MYSQL_PASS $MYSQL_DB < add_pk.sql
+#mysql --host=$MYSQL_HOST --user=$MYSQL_USER --password=$MYSQL_PASS $MYSQL_DB < add_pk.sql
 

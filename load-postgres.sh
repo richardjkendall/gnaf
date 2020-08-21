@@ -2,17 +2,17 @@
 
 ############################################################
 #							   #
-# load-mysql.sh						   #
+# load-postgres.sh					   #
 #							   #
-# Loads GNAF data to a MySQL database			   #
-# 19/08/2020						   #
+# Loads GNAF data to a postgres database		   #
+# 21/08/2020						   #
 #							   #
 ############################################################
 
-MYSQL_HOST="10.0.1.208"
-MYSQL_USER="rjk"
-MYSQL_PASS="test123"
-MYSQL_DB="gnaf"
+PG_HOST="127.0.0.1"
+PG_USER="rjk"
+PG_PASS="test123"
+PG_DB="gnaf"
 
 AUT=$1
 AUT_REGEX="Authority_Code_([[:upper:]_]+)_psv\.psv"
@@ -20,7 +20,7 @@ DAT=$2
 DAT_REGEX="(ACT|NSW|NT|QLD|SA|OT|TAS|VIC|WA)_([[:upper:][:digit:]_]+)_psv\.psv"
 
 echo "*** creating tables ***"
-mysql --host=$MYSQL_HOST --user=$MYSQL_USER --password=$MYSQL_PASS $MYSQL_DB < create_tables_ansi.sql
+PGPASSWORD=$PG_PASS psql -h $PG_HOST -U $PG_USER -d $PG_DB -a -f create_tables_ansi.sql
 
 echo ""
 echo "*** Working on Authority codes ***"
@@ -34,7 +34,7 @@ if [[ -d "$AUT" ]]; then
 		if [[ "$aut_file" =~ $AUT_REGEX ]]; then
 			TABLE_NAME=${BASH_REMATCH[1]}
 			echo "Table name: $TABLE_NAME"
-			echo "LOAD DATA LOCAL INFILE '$aut_file' INTO TABLE $TABLE_NAME COLUMNS TERMINATED BY '|' LINES TERMINATED BY '\r\n' IGNORE 1 LINES" | mysql --local-infile=1 --host=$MYSQL_HOST --user=$MYSQL_USER --password=$MYSQL_PASS $MYSQL_DB
+			echo "\copy $TABLE_NAME FROM '$aut_file' DELIMITER '|' CSV HEADER" | PGPASSWORD=$PG_PASS psql -h $PG_HOST -U $PG_USER -d $PG_DB 
 		fi
 	done
 else
@@ -54,7 +54,7 @@ if [[ -d "$DAT" ]]; then
 		if [[ "$dat_file" =~ $DAT_REGEX ]]; then
 			TABLE_NAME=${BASH_REMATCH[2]}
 			echo "Table name: $TABLE_NAME"
-			echo "LOAD DATA LOCAL INFILE '$dat_file' INTO TABLE $TABLE_NAME COLUMNS TERMINATED BY '|' LINES TERMINATED BY '\r\n' IGNORE 1 LINES" | mysql --local-infile=1 --host=$MYSQL_HOST --user=$MYSQL_USER --password=$MYSQL_PASS $MYSQL_DB
+			echo "\copy $TABLE_NAME FROM '$dat_file' DELIMITER '|' CSV HEADER" | PGPASSWORD=$PG_PASS psql -h $PG_HOST -U $PG_USER -d $PG_DB
 		fi
 	done
 fi
